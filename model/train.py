@@ -5,35 +5,39 @@ from sklearn.preprocessing import LabelEncoder
 import joblib
 
 # Load dataset
-df = pd.read_csv("data/autism.csv")  # your dataset path
+df = pd.read_csv("data/autism.csv")
+print("Dataset columns:", df.columns.tolist())
 
-# Drop non-feature columns if needed
-if 'id' in df.columns:
-    df = df.drop('id', axis=1)
+# Identify and preprocess target column
+if 'Class/ASD' in df.columns:
+    target_col = 'Class/ASD'
+elif 'result' in df.columns:
+    target_col = 'result'
+else:
+    raise ValueError("Target column not found")
 
-# One-hot encode categorical features (except target)
-if 'gender' in df.columns and df['gender'].dtype == object:
-    df = pd.get_dummies(df, columns=['gender'], drop_first=True)
+# One-hot encode features (if categorical)
+df = pd.get_dummies(df, drop_first=True)
 
-# Define X and y
-X = df.drop("class", axis=1)
-y = df["class"]
+X = df.drop(columns=[target_col])
+y = df[target_col]
 
-# ✅ Ensure target is categorical
-if y.dtype != 'int' and y.dtype != 'int64':
+# Ensure target y is categorical integer
+if y.dtype.name != 'int64':
     try:
-        # If numeric but continuous
         y = y.round().astype(int)
-    except:
-        # If non-numeric (string labels)
+    except Exception:
         y = LabelEncoder().fit_transform(y)
 
-# Train-test split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Train model
-model = RandomForestClassifier()
+model = RandomForestClassifier(random_state=42)
 model.fit(X_train, y_train)
 
 # Save model
 joblib.dump(model, "model.pkl")
+print("Model trained and saved as model.pkl")
