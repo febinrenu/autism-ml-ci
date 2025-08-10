@@ -27,7 +27,7 @@ jobs:
     - name: Download dataset
       run: |
         mkdir -p data
-        wget -O data/autism.csv https://raw.githubusercontent.com/your-username/your-repo/main/data/autism.csv
+        wget -O data/autism.csv https://raw.githubusercontent.com/febinrenu/autism-ml-ci/main/data/autism.csv
 
     - name: Train the Model
       run: |
